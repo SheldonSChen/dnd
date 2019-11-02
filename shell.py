@@ -27,6 +27,13 @@ class DndShell(cmd.Cmd):
         Command of the form: damage <weapon>
         """
         damage(arg)
+    
+    def do_cast(self, arg):
+        """
+        Rolls for spell casting.
+        Command of the form: cast <spell>
+        """
+        cast(arg)
 
     def do_exit(self, arg):
         """

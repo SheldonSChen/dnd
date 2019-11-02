@@ -3,13 +3,16 @@ from char import *
 
 ############### Shell Fn ################
 def check(stat):
-    action(stat, CHAR_STAT, 20, [])
+    action(stat, CHAR_STATS, 20, [])
 
 def attack(weapon):
-    action(weapon, WEAPON, 20, ["mod", "prof"])
+    action(weapon, WEAPONS, 20, ["mod", "prof"])
 
 def damage(weapon):
-    action(weapon, WEAPON, "dice", ["mod"])
+    action(weapon, WEAPONS, "dice", ["mod"])
+
+def cast(spell):
+    action(spell, SPELLS, 20, [])
 
 def test():
     return -1
