@@ -15,8 +15,6 @@ class DndShell(cmd.Cmd):
 
     def do_damage(self, arg):
         damage(arg)
-    
-    def do_spell():
 
     def do_exit(self, arg):
         print('Thank you for using Dnd')

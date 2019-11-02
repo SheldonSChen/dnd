@@ -2,29 +2,14 @@ import random
 from char import *
 
 ############### Shell Fn ################
-def action(arg, dictionary, dice, bonus):
-    if arg in dictionary:
-        print(roll_d(dice) + bonus)
-    else:
-        print("ERROR: {} not found".format(arg))
-
 def check(stat):
-    if stat in CHAR_STAT:
-        print(roll_d(20) + CHAR_STAT[stat])
-    else:
-        print_err_msg(stat)
+    action(stat, CHAR_STAT, 20, [])
 
 def attack(weapon):
-    if weapon in WEAPON:
-        print(roll_d(20) + WEAPON[weapon]["mod"] + WEAPON[weapon]["prof"])
-    else:
-        print_err_msg(weapon)
+    action(weapon, WEAPON, 20, ["mod", "prof"])
 
 def damage(weapon):
-    if weapon in WEAPON:
-        print(roll_d(WEAPON[weapon]["dice"]) + WEAPON[weapon]["mod"])
-    else:
-        print_err_msg(weapon)
+    action(weapon, WEAPON, "dice", ["mod"])
 
 def test():
     return -1
@@ -33,5 +18,23 @@ def test():
 def roll_d(n):
     return random.randint(1,n)
 
-# def print_err_msg(arg):
-#     print("ERROR: {} not found".format(arg))
+def action(arg, dictionary, dice, bonus_sub_cats):
+    """
+    Rolls a dice and adds corresponding bonuses.
+    dice           - either num or "dice" if dependent on arg
+    bonus_sub_cats - list of sub categories for dictionary[arg]
+    """
+
+    if arg not in dictionary:
+        print("ERROR: {} not found".format(arg))
+        return 
+    
+    bonus = 0
+    if len(bonus_sub_cats) == 0:
+        bonus = dictionary[arg]
+    else:
+        for cat in bonus_sub_cats:
+            bonus += dictionary[arg][cat]
+    
+    n = dictionary[arg][dice] if dice == "dice" else dice
+    print(roll_d(n) + bonus)
