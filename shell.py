@@ -8,15 +8,30 @@ class DndShell(cmd.Cmd):
 
     # call do_xxx() by typing "xxx"
     def do_check(self, arg):
+        """
+        Rolls an ability/skill check or save.
+        Command of the form: check <stat>
+        """
         check(arg)
 
     def do_attack(self, arg):
+        """
+        Rolls for an attack to hit.
+        Command of the form: attack <weapon>
+        """
         attack(arg)
 
     def do_damage(self, arg):
+        """
+        Rolls for damage.
+        Command of the form: damage <weapon>
+        """
         damage(arg)
 
     def do_exit(self, arg):
+        """
+        Exits the shell
+        """
         print('Thank you for using Dnd')
         return True
 
