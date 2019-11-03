@@ -52,6 +52,9 @@ CHAR_STATS = {
     "intimidation": CHAR_MODS["cha"],
     "performance":  CHAR_MODS["cha"],
     "persuasion":   CHAR_MODS["cha"] + PROF,
+
+    # SPELL
+    "spell save": 8 + CHAR_MODS["wis"] + PROF,
 }
 
 ############### Weapons ##############
@@ -69,17 +72,13 @@ WEAPONS = {
 }
 
 ############### Spells ##############
-SPELL_SAVE_DC = 8 + PROF + CHAR_MODS["wis"]
 """
 Making a spell attack = 1d20 + Spell Attack Bonus
 Spell Attack Bonus = Proficiency + Wisdom mod
 Healing Word = 1d4/spell level + Wis mod
 Cure Wounds = 1d8/spell level + Wis mod
 
-Every time a spell is casted, a slot is consumed.
-Spells can be casted at a higher level as well.
-
-TODO: Spell slot calc (consume get/set and reset), attack bonus
+TODO: attack bonus
 different die and mods for each spell perhaps? 
 """
 SPELLS = {

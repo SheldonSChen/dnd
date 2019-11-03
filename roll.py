@@ -16,7 +16,6 @@ def cast(spell):
 
 def get_slots(level):    
     if not level:
-        print(SPELL_SLOTS)
         print(SPELL_SLOTS_REMAIN)
     elif int(level) in SPELL_SLOTS_REMAIN:
         print(SPELL_SLOTS_REMAIN[int(level)])
@@ -57,10 +56,17 @@ def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False):
         return 
     
     if is_spell:
+        # spell prepared? (level 0 always prepared)
+        if dictionary[arg]["level"] > 0 and not dictionary[arg]["prepared"]:
+            print("ERROR: {} is not prepared. Cannot be cast".format(arg))
+            return
+        
+        # spell slot available?
         level = dictionary[arg]["level"]
         success = consume_spell_slot(level)
         if not success:
             print("ERROR: Spell slot not available for level {} spell".format(level))
+            return
     
     # bonus = 0
     # if len(bonus_sub_cats) == 0:
@@ -73,6 +79,11 @@ def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False):
     # print(roll_d(n) + bonus)
 
 def consume_spell_slot(level):
+    """
+    Every time a spell is casted, a level's spell slot is consumed.
+    Level 0 spells (i.e. Cantrips) do not consume any slots.
+    Spells can be casted at a higher level as well.
+    """
     if level == 0:
         return True
 
