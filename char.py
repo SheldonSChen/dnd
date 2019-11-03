@@ -136,3 +136,8 @@ SPELLS = {
         "prepared": True,
         },
 }
+
+SPELL_SLOTS = {
+    1: 4,
+    2: 2,
+}

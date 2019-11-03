@@ -34,6 +34,20 @@ class DndShell(cmd.Cmd):
         Command of the form: cast <spell>
         """
         cast(arg)
+    
+    def do_get_slots(self, arg=None):
+        """
+        Gets the currently available spell slots.
+        Command of the form: get_slots <level (optional)>
+        """
+        get_slots(arg)
+
+    def do_set_slots(self, arg):
+        """
+        Sets the currently available spell slots.
+        Command of the form: set_slots <level, slot, ...>
+        """
+        set_slots(arg)
 
     def do_exit(self, arg):
         """
