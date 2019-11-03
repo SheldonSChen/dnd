@@ -17,8 +17,9 @@ def cast(spell):
 def get_slots(level):    
     if not level:
         print(SPELL_SLOTS)
-    elif int(level) in SPELL_SLOTS:
-        print(SPELL_SLOTS[int(level)])
+        print(SPELL_SLOTS_REMAIN)
+    elif int(level) in SPELL_SLOTS_REMAIN:
+        print(SPELL_SLOTS_REMAIN[int(level)])
     else:
         print("ERROR: level {} not found".format(level))
 
@@ -31,7 +32,11 @@ def set_slots(level_slots_flat):
     # level_slots is list of (level, slot) pairs
     level_slots = zip(level_slots[0::2], level_slots[1::2])
     for level, num_slots in level_slots:
-        SPELL_SLOTS[level] = num_slots
+        SPELL_SLOTS_REMAIN[level] = num_slots
+
+def reset_slots():
+    global SPELL_SLOTS_REMAIN # need global tag for global var assignment in func
+    SPELL_SLOTS_REMAIN = SPELL_SLOTS.copy()
 
 def test():
     return -1
@@ -57,15 +62,27 @@ def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False):
         if not success:
             print("ERROR: Spell slot not available for level {} spell".format(level))
     
-    bonus = 0
-    if len(bonus_sub_cats) == 0:
-        bonus = dictionary[arg]
-    else:
-        for cat in bonus_sub_cats:
-            bonus += dictionary[arg][cat]
+    # bonus = 0
+    # if len(bonus_sub_cats) == 0:
+    #     bonus = dictionary[arg]
+    # else:
+    #     for cat in bonus_sub_cats:
+    #         bonus += dictionary[arg][cat]
     
-    n = dictionary[arg][dice] if dice == "dice" else dice
-    print(roll_d(n) + bonus)
+    # n = dictionary[arg][dice] if dice == "dice" else dice
+    # print(roll_d(n) + bonus)
 
 def consume_spell_slot(level):
-    return
+    if level == 0:
+        return True
+
+    curr_level = level
+    consumed = False
+    while not consumed and curr_level in SPELL_SLOTS_REMAIN:
+        if SPELL_SLOTS_REMAIN[curr_level] > 0:
+            SPELL_SLOTS_REMAIN[curr_level] -= 1
+            consumed = True
+        else:
+            curr_level += 1
+    
+    return consumed

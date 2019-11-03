@@ -48,6 +48,13 @@ class DndShell(cmd.Cmd):
         Command of the form: set_slots <level, slot, ...>
         """
         set_slots(arg)
+    
+    def do_reset_slots(self, arg):
+        """
+        Resets the currently available spell slots to max.
+        Command of the form: reset_slots
+        """
+        reset_slots()
 
     def do_exit(self, arg):
         """

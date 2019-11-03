@@ -141,3 +141,5 @@ SPELL_SLOTS = {
     1: 4,
     2: 2,
 }
+
+SPELL_SLOTS_REMAIN = SPELL_SLOTS.copy()
