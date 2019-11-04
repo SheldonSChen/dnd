@@ -32,16 +32,17 @@ def get_slots(level):
         print("ERROR: level {} not found".format(level))
 
 def set_slots(level_slots_flat):
-    level_slots = convert_flat_to_pairs(level_slots_flat, SPELL_SLOTS, int, int, int)
+    level_slots = convert_flat_to_pairs(level_slots_flat, SPELL_SLOTS_MAX, int, int, int)
     if not level_slots:
         return
-
+        
+    # level_slots now list of (int level, int num_slots) pairs
     for level, num_slots in level_slots:
         SPELL_SLOTS_REMAIN[level] = num_slots
 
 def reset_slots():
     global SPELL_SLOTS_REMAIN # need global tag for global var assignment in func
-    SPELL_SLOTS_REMAIN = SPELL_SLOTS.copy()
+    SPELL_SLOTS_REMAIN = SPELL_SLOTS_MAX.copy()
 
 def get_money():
     print(MONEY)
@@ -51,32 +52,31 @@ def spend_money(coin_amount_flat):
     if not coin_amount:
         return
 
+    # coin_amount now list of (int index, int amount) pairs
     # check if I have enough money
-    MONEY_TEMP = MONEY
-    spendable = True
-    print(coin_amount)
-    # for coin, amount_spent in coin_amount:
-    #     if MONEY[coin]["amount"] > amount_spent:
-    #         MONEY[coin]["amount"] -= amount_spent
-    #     else:
-    #         spent = False
-    #         larger_coin = MONEY[coin]["next"]
-    #         while larger_coin and not spent:
-    #             coin = MONEY[coin]["next"]
-    #             amount_spent /= 10.0
-    #             if MONEY[coin]["amount"] > amount_spent:
-    #                 MONEY[coin]["amount"] -= amount_spent
+    total_spent = 0
+    for coinage, amount in coin_amount:
+        total_spent += amount * (10 ** coinage)
+
+    total_money = 0
+    for amount in reversed(MONEY):
+        total_money = total_money * 10 + amount
+
+    if total_spent > total_money:
+        print("ERROR: Insufficient funds")
+        return 
     
-    # if not spendable:
-    #     global MONEY
-    #     MONEY = MONEY_TEMP
-    #     print("ERROR: insufficient funds")
-    #     return
-    
-    # print("{} remaining".format(MONEY))
+    remaining_money = total_money - total_spent
+    # Ignore platinum.
+    for i in range(coin_to_index("gold")):
+        MONEY[i] = remaining_money % 10
+        remaining_money /= 10
+    MONEY[coin_to_index("gold")] = remaining_money
+
+    print("SUCCESS: You now have {}".format(MONEY))
 
 def get_hp():
-    print(CUR_HP)
+    print("Your current HP: {}".format(CUR_HP))
 
 def set_hp(hp):
     if not contains_num(hp):
@@ -85,6 +85,7 @@ def set_hp(hp):
 
     global CUR_HP
     CUR_HP = int(hp)
+    get_hp()
 
 def take_damage(damage):
     if not contains_num(damage):
@@ -175,6 +176,7 @@ def convert_flat_to_pairs(flat_list, dictionary, key_map_fn, val_map_fn, pre_con
     """
     Converts a string into a list of (key, value) pairs
     Applies the appropriate mappings to keys and values
+    Values must all be non-negative.
     flat_list - raw string representation ("<key> <value> ...")
     dictionary - dict that should contain all the keys in flat_list
     key_map_fn - function to be mapped to keys
@@ -197,4 +199,9 @@ def convert_flat_to_pairs(flat_list, dictionary, key_map_fn, val_map_fn, pre_con
 
     keys = map(key_map_fn, flat_list[0::2])
     values = map(val_map_fn, flat_list[1::2])
+    
+    if any(val < 0 for val in values):
+        print("ERROR: Invalid values: {}".format(values))
+        return None
+    
     return zip(keys, values)

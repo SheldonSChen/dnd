@@ -59,11 +59,13 @@ CHAR_STATS = {
 }
 
 ############### Money ###############
+# Only the wealthy have platinum
 COINAGE = ["copper", "silver", "gold", "platinum"]
+EXCHANGE = [1, 10, 100, 1000]
 MONEY = [0, 13, 42, 0]
 
 MAX_HP = 18
-CUR_HP = MAX_HP
+CUR_HP = 18
 
 ############### Weapons ##############
 WEAPONS = {
@@ -184,9 +186,12 @@ SPELLS = {
         },
 }
 
-SPELL_SLOTS = {
+SPELL_SLOTS_MAX = {
     1: 4,
     2: 2,
 }
 
-SPELL_SLOTS_REMAIN = SPELL_SLOTS.copy()
+SPELL_SLOTS_REMAIN = {
+    1: 4,
+    2: 2,
+}
