@@ -31,7 +31,7 @@ class DndShell(cmd.Cmd):
     def do_cast(self, arg):
         """
         Rolls for spell casting.
-        Command of the form: cast <spell>
+        Command of the form: cast <spell> <level (optional)>
         """
         cast(arg)
     
@@ -45,7 +45,7 @@ class DndShell(cmd.Cmd):
     def do_set_slots(self, arg):
         """
         Sets the currently available spell slots.
-        Command of the form: set_slots <level, slot, ...>
+        Command of the form: set_slots <level> <slot> ...
         """
         set_slots(arg)
     
@@ -55,6 +55,41 @@ class DndShell(cmd.Cmd):
         Command of the form: reset_slots
         """
         reset_slots()
+    
+    def do_get_money(self, arg):
+        """
+        Returns the current amount of money.
+        Command of the form: get_money
+        """
+        get_money()
+
+    def do_spend_money(self, arg):
+        """
+        Spends money of each type.
+        Command of the form: spend_money <type> <amount> ...
+        """
+        spend_money(arg)
+    
+    def do_get_hp(self, arg):
+        """
+        Returns current HP.
+        Command of the form: get_hp
+        """
+        get_hp()
+    
+    def do_set_hp(self, arg):
+        """
+        Sets current HP to arg
+        Command of the form: set_hp <cur_hp>
+        """
+        set_hp(arg)
+    
+    def do_take_damage(self, arg):
+        """
+        Decreases current HP by damage taken.
+        Command of the form: take_damage <damage>
+        """
+        take_damage(arg)
 
     def do_exit(self, arg):
         """
