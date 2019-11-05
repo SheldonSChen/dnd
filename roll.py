@@ -1,8 +1,6 @@
 import random
 from char import *
 
-#TODO: All int converts need a check!
-
 ############### Shell Fn ################
 def check(stat):
     action(stat, CHAR_STATS, 20, [])
@@ -25,9 +23,9 @@ def cast(spell, level=None):
 
 def get_slots(level=None):    
     if not level:
-        print(SPELL_SLOTS_REMAIN)
+        print_cur_spell_slots()
     elif level in SPELL_SLOTS_REMAIN:
-        print(SPELL_SLOTS_REMAIN[level])
+        print("lvl {}: {}".format(level, SPELL_SLOTS_REMAIN[level]))
     else:
         print("ERROR: level {} not found".format(level))
 
@@ -64,8 +62,8 @@ def transaction(amounts_coinage, earn_or_spend):
         print("ERROR: Invalid transaction type: {}".format(earn_or_spend))
         return
 
-    # check if I have enough money
     if earn_or_spend == "spend":
+        # check if I have enough money
         total_spend = 0
         for amount, coinage in amounts_coinage:
             total_spend += amount * (10 ** coin_to_index(coinage))
@@ -84,7 +82,9 @@ def transaction(amounts_coinage, earn_or_spend):
             MONEY[i] = remaining_money % 10
             remaining_money /= 10
         MONEY[coin_to_index("gold")] = remaining_money
+
     elif earn_or_spend == "earn":
+        # Assumed cannot exchange when receiving specific coins.
         for amount, coinage in amounts_coinage:
             MONEY[coin_to_index(coinage)] += amount
 
@@ -139,9 +139,17 @@ def coin_to_index(coin):
 def print_cur_money():
     print("Current balance:")
     val = ""
-    for i in range(len(COINAGE)-1):
+    for i in range(len(COINAGE)):
         val += "{} {}, ".format(MONEY[i], COINAGE[i])
-    val += "{} {}".format(MONEY[len(COINAGE)-1], COINAGE[len(COINAGE)-1])
+    val = val[: -2]
+    print(val)
+
+def print_cur_spell_slots():
+    print("Current spell slots:")
+    val = ""
+    for level in SPELL_SLOTS_REMAIN:
+        val += "lvl {}: {}, ".format(level, SPELL_SLOTS_REMAIN[level])
+    val = val[: -2]
     print(val)
 
 def num_in_str(input_string, any_or_all):

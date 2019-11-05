@@ -85,12 +85,11 @@ WEAPONS = {
 '''
 Making a spell attack = 1d20 + Spell Attack Bonus
 Spell Attack Bonus = Proficiency + Wisdom mod
-Healing Word = 1d4/spell level + Wis mod
-Cure Wounds = 1d8/spell level + Wis mod
 
 TODO: attack bonus
-different die and mods for each spell perhaps?
-cast spells at specific levels 
+different die and mods for each spell perhaps
+cast spells at specific levels
+other spells on first page - once every long_rest 
 '''
 SPELLS = {
     # Level 0 (Cantrips)

@@ -178,11 +178,29 @@ class DndShell(cmd.Cmd):
             return
         take_damage(int(arg))
 
+    def do_long_rest(self, arg):
+        '''
+        Take a long rest.
+        Command: 
+            long_rest
+        '''
+        # TODO: restore things after long rest
+        # long_rest()
+        print("NOT YET")
+
     def do_exit(self, arg):
         '''
         Exits the shell
         '''
-        print('Thank you for using Dnd')
+        print('Thank you for using Dnd.')
+        print('Please change the following in the code:')
+        print('')
+        get_slots()
+        print('')
+        get_money()
+        print('')
+        get_hp()
+        print('')
         return True
 
 ############### Helper Fn ###############
@@ -230,5 +248,6 @@ def convert_str_to_pairs(flat_list, key_map_fn, val_map_fn, key_check=None, val_
 
     return zip(keys, values)
 
+############### Main Fn ###############
 if __name__ == '__main__':
     DndShell().cmdloop()
