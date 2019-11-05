@@ -1,3 +1,6 @@
+from __future__ import print_function
+from sharedHelpers import *
+
 ############### Char Stats ##############
 CHAR_MODS = {
     "str": 0,
@@ -54,13 +57,13 @@ CHAR_STATS = {
     "persuasion":   CHAR_MODS["cha"] + PROF,
 
     # SPELL
-    "spell save dc": 8 + CHAR_MODS["wis"] + PROF,
     "spell attack": CHAR_MODS["wis"] + PROF,
+    "spell save dc": 8 + CHAR_MODS["wis"] + PROF,
 }
 
 ############### Money ###############
 # Only the wealthy have platinum
-COINAGE = ["copper", "silver", "gold", "platinum"]
+COINAGES = ["copper", "silver", "gold", "platinum"]
 EXCHANGE = [1, 10, 100, 1000]
 MONEY = [0, 13, 42, 0]
 
@@ -70,12 +73,12 @@ CUR_HP = 18
 ############### Weapons ##############
 WEAPONS = {
     "mace": {
-        "mod": CHAR_MODS["str"],
+        "mod": CHAR_STATS["str"],
         "prof": PROF,
         "dice": 6,
         },
     "dart": {
-        "mod": CHAR_MODS["dex"],
+        "mod": CHAR_STATS["dex"],
         "prof": PROF,
         "dice": 4,
         },
@@ -108,6 +111,8 @@ SPELLS = {
         # WIS save or 1d8 necrotic damage
         # 1d12 if target is missing any HP 
         "level": 0,
+        "action":
+            lambda _: print("d8: {} or d12: {} necrotic damage".format(roll_d(8), roll_d(12)))
         },
     "resistance": {
         # touch
@@ -118,6 +123,8 @@ SPELLS = {
         # 5ft, choose target(s)
         # CON save or 1d6 radiant damage
         "level": 0,
+        "action": 
+            lambda _: print("{} radiant damage".format(roll_d(6)))
         },
     
     # Level 1
@@ -125,13 +132,15 @@ SPELLS = {
         # 30ft, up to (2 + cast level) targets
         # CHA save or 1d4 penalty to attacks/saves
         "level": 1,
-        "prepared": True,
+        "prepared": False,
         },
     "false life": {
         # self
-        # Gain 1d4 + 5(cast level) - 1 temp HP
+        # I gain 1d4 + 5(cast level) - 1 temp HP
         "level": 1,
-        "prepared": False,
+        "prepared": True,
+        "self heal":
+            lambda cast_level: roll_d(4) + 5 * cast_level -1
         },
     "command": {
         # 60ft, (cast level) targets
@@ -145,6 +154,9 @@ SPELLS = {
         # (cast level + 2)d10 necrotic damage
         "level": 1,
         "prepared": True,
+        "attack roll": True,
+        "action":
+            lambda cast_level: print("{} necrotic damage".format(roll_d(10, cast_level + 2)))
         },
     "bless": {
         # 30ft, up to (2 + cast level) targets
@@ -158,6 +170,8 @@ SPELLS = {
         # Regain (cast level)d4 + CHAR_STATS["wis"] HP
         "level": 1,
         "prepared": True,
+        "action":
+            lambda cast_level: print("Target regained {} HP".format(roll_d(4, cast_level) + CHAR_STATS["wis"]))
         },
     "protection from evil and good": {
         # touch
@@ -176,6 +190,8 @@ SPELLS = {
         # Each regain (cast level)d8 + CHAR_STATS["wis"] HP
         "level": 2,
         "prepared": True,
+        "action":
+            lambda cast_level: print("Target(s) regained {} HP".format(roll_d(8, cast_level) + CHAR_STATS["wis"]))
         },
     "aid": {
         # 30ft, choose up to 3 allies
@@ -184,6 +200,30 @@ SPELLS = {
         "prepared": True,
         },
 }
+
+# LONG_REST_SPELLS = {
+#     "healing hands": {
+#         "uses": 1,
+#         "max uses": 1,
+#         },
+#     "turn undead": {
+
+#         },
+#     "path to the grave": {
+
+#         },
+#     "necrotic shroud": {
+#         "uses": 1,
+#         "max uses": 1
+#         },
+#     "circle of mortality": {
+
+#         },
+#     "eyes of the grave": {
+#         "uses": CHAR_STATS["wis"]
+#         "max uses": CHAR_STATS["wis"]
+#         },
+# }
 
 SPELL_SLOTS_MAX = {
     1: 4,
@@ -194,3 +234,26 @@ SPELL_SLOTS_REMAIN = {
     1: 4,
     2: 2,
 }
+
+############### Helper Fn ###############
+def coin_to_index(coin, coinages):
+    if coin in coinages:
+        return coinages.index(coin)
+    else:
+        return -1
+
+def print_cur_money(money, coinages):
+    print("Current balance:")
+    val = ""
+    for i in range(len(coinages)):
+        val += "{} {}, ".format(money[i], coinages[i])
+    val = val[: -2]
+    print(val)
+
+def print_cur_spell_slots(spell_slots_remain):
+    print("Current spell slots:")
+    val = ""
+    for level in spell_slots_remain:
+        val += "lvl {}: {}, ".format(level, spell_slots_remain[level])
+    val = val[: -2]
+    print(val)

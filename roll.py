@@ -1,7 +1,15 @@
-import random
 from char import *
+from sharedHelpers import *
+# TODO: rolling w/ ADVANTAGE, and boosts!
 
 ############### Shell Fn ################
+def get(stat):
+    if stat not in CHAR_STATS:
+        print("ERROR: {} not valid stat.".format(stat))
+        return
+    
+    print(CHAR_STATS[stat])
+
 def check(stat):
     action(stat, CHAR_STATS, 20, [])
 
@@ -19,11 +27,48 @@ def cast(spell, level=None):
         spell (str): The spell to be cast.
         level (int): The level at which to cast the spell. (default=None)
     '''
-    action(spell, SPELLS, 20, [], True, level)
+    # TODO: incorporate LONG_REST_SPELLS
+    if spell not in SPELLS:
+        print("ERROR: {} not found".format(spell))
+        return 
+    
+    # spell prepared? (level 0 always prepared)
+    if SPELLS[spell]["level"] > 0 and not SPELLS[spell]["prepared"]:
+        print("ERROR: {} is not prepared. Cannot be cast".format(spell))
+        return
+    
+    # cast level greater than base level?
+    base_level = SPELLS[spell]["level"]
+    search_slot = False
+    # cast level not specified, default to base, can cast at any higher level
+    if not level:
+        level = base_level
+        search_slot = True
+    
+    if level < base_level:
+        print("Spell must be cast at level {} or higher.".format(base_level))
+        return
+    
+    # spell slot available? if so, consume
+    cast_level = consume_spell_slot(level, search_slot)
+    if cast_level == None:
+        print("ERROR: Spell slot not available for level {}".format(level))
+        return
+    
+    if "attack roll" in SPELLS[spell]:
+        print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
+    
+    if "self heal" in SPELLS[spell]:
+        hp_change(SPELLS[spell]["self heal"](cast_level))
+
+    if "action" in SPELLS[spell]:
+        SPELLS[spell]["action"](cast_level)
+
+    print("{} was cast at level {}.".format(spell, cast_level))
 
 def get_slots(level=None):    
     if not level:
-        print_cur_spell_slots()
+        print_cur_spell_slots(SPELL_SLOTS_REMAIN)
     elif level in SPELL_SLOTS_REMAIN:
         print("lvl {}: {}".format(level, SPELL_SLOTS_REMAIN[level]))
     else:
@@ -48,11 +93,11 @@ def reset_slots():
     SPELL_SLOTS_REMAIN = SPELL_SLOTS_MAX.copy()
 
 def get_money():
-    print_cur_money()
+    print_cur_money(MONEY, COINAGES)
 
 def transaction(amounts_coinage, earn_or_spend):
     amounts, coinages = zip(*amounts_coinage)
-    if not all(coinage in COINAGE for coinage in coinages):
+    if not all(coinage in COINAGES for coinage in coinages):
         print("ERROR: Invalid coinages: {}".format(coinages))
         return
     if not all(amount >= 0 for amount in amounts):
@@ -66,7 +111,7 @@ def transaction(amounts_coinage, earn_or_spend):
         # check if I have enough money
         total_spend = 0
         for amount, coinage in amounts_coinage:
-            total_spend += amount * (10 ** coin_to_index(coinage))
+            total_spend += amount * (10 ** coin_to_index(coinage, COINAGES))
 
         total_money = 0
         for amount in reversed(MONEY):
@@ -78,17 +123,17 @@ def transaction(amounts_coinage, earn_or_spend):
         
         remaining_money = total_money - total_spend
         # Ignore platinum. Exchange for least coins possible
-        for i in range(coin_to_index("gold")):
+        for i in range(coin_to_index("gold", COINAGES)):
             MONEY[i] = remaining_money % 10
             remaining_money /= 10
-        MONEY[coin_to_index("gold")] = remaining_money
+        MONEY[coin_to_index("gold", COINAGES)] = remaining_money
 
     elif earn_or_spend == "earn":
         # Assumed cannot exchange when receiving specific coins.
         for amount, coinage in amounts_coinage:
-            MONEY[coin_to_index(coinage)] += amount
+            MONEY[coin_to_index(coinage, COINAGES)] += amount
 
-    print_cur_money()
+    print_cur_money(MONEY, COINAGES)
 
 def get_hp():
     print("Your current HP: {}".format(CUR_HP))
@@ -100,15 +145,8 @@ def set_hp(hp, hp_type=None):
     hp - (int) new hp value
     hp_type - (string) "max" if max hp is to be set.
     '''
-    if not num_in_str(hp, all):
-        print("ERROR: Invalid hp {}".format(hp))
-        return
-    hp = int(hp)
-    
-    if hp_type and hp_type != "max":
-        print("ERROR: Invalid HP type: {}".format(hp_type))
-        return
-    
+    if hp < 0:
+        hp = 0
     if hp_type == None:
         global CUR_HP
         CUR_HP = hp
@@ -118,47 +156,23 @@ def set_hp(hp, hp_type=None):
 
     get_hp()
 
-def take_damage(damage):
+def hp_change(change):
     '''
-    Player takes damage.
-    damage - (int) damage received.
+    Player's CUR_HP changes by change points.
+    Healed: change > 0
+    Damaged: change < 0
     '''
-    remaining_hp = CUR_HP - damage
+    remaining_hp = CUR_HP + change
     set_hp(remaining_hp)
+
+def reset_hp():
+    set_hp(MAX_HP)
 
 def test(arg):
     print(arg)
 
 ############### Helper Fn ###############
-def coin_to_index(coin):
-    if coin in COINAGE:
-        return COINAGE.index(coin)
-    else:
-        return -1
-
-def print_cur_money():
-    print("Current balance:")
-    val = ""
-    for i in range(len(COINAGE)):
-        val += "{} {}, ".format(MONEY[i], COINAGE[i])
-    val = val[: -2]
-    print(val)
-
-def print_cur_spell_slots():
-    print("Current spell slots:")
-    val = ""
-    for level in SPELL_SLOTS_REMAIN:
-        val += "lvl {}: {}, ".format(level, SPELL_SLOTS_REMAIN[level])
-    val = val[: -2]
-    print(val)
-
-def num_in_str(input_string, any_or_all):
-    return any_or_all(char.isdigit() for char in input_string)
-
-def roll_d(n):
-    return random.randint(1,n)
-
-def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False, spell_level=None):
+def action(arg, dictionary, dice, bonus_sub_cats):
     '''
     Rolls a dice and adds corresponding bonuses.
     dice           - either num or "dice" if dependent on arg
@@ -168,26 +182,6 @@ def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False, spell_level=No
     if arg not in dictionary:
         print("ERROR: {} not found".format(arg))
         return 
-    
-    if is_spell:
-        # spell prepared? (level 0 always prepared)
-        if dictionary[arg]["level"] > 0 and not dictionary[arg]["prepared"]:
-            print("ERROR: {} is not prepared. Cannot be cast".format(arg))
-            return
-        
-        # cast level greater than base level?
-        base_level = dictionary[arg]["level"]
-        if not spell_level:
-            spell_level = base_level
-        if spell_level < base_level:
-            print("Spell must be cast at level {} or higher.".format(base_level))
-            return
-        
-        # spell slot available? 
-        success = consume_spell_slot(spell_level)
-        if not success:
-            print("ERROR: Spell slot not available for level {}".format(spell_level))
-            return
     
     bonus = 0
     if len(bonus_sub_cats) == 0:
@@ -199,60 +193,25 @@ def action(arg, dictionary, dice, bonus_sub_cats, is_spell=False, spell_level=No
     n = dictionary[arg][dice] if dice == "dice" else dice
     print(roll_d(n) + bonus)
 
-def consume_spell_slot(level):
+def consume_spell_slot(level, search=True):
     '''
     Every time a spell is casted, a level's spell slot is consumed.
     Level 0 spells (i.e. Cantrips) do not consume any slots.
-    Spells can be casted at a higher level as well.
+    Spells can be casted at a higher level as well, if not specified and available.
     '''
     if level == 0:
-        return True
+        return 0
 
     curr_level = level
-    consumed = False
+    consumed = None
     while not consumed and curr_level in SPELL_SLOTS_REMAIN:
         if SPELL_SLOTS_REMAIN[curr_level] > 0:
             SPELL_SLOTS_REMAIN[curr_level] -= 1
-            consumed = True
+            consumed = curr_level
         else:
             curr_level += 1
+        
+        if not search:
+            break
     
     return consumed
-
-def convert_flat_to_pairs(flat_list, dictionary, key_map_fn, val_map_fn, pre_convert_key_fn=None):
-    ''' Converts a string into a list of (key, value) pairs.
-
-    Applies the appropriate mappings to keys and values
-    Values must all be non-negative.
-
-    Args:
-        flat_list (str): The string representation of the pairs ("<key> <value> ...")
-        dictionary (dict): The dict that should contain all the keys in flat_list
-        key_map_fn (func): The function to be mapped to keys
-        val_map_fn (func): The function to be mapped to values
-        pre_convert_key_fn (func): function to be mapped to keys before dict check (default=None)
-    
-    Returns:
-        The new list of pairs, or None if error
-    '''
-
-    flat_list = flat_list.split()
-    if len(flat_list) == 0 or len(flat_list) % 2 != 0:
-        print("ERROR: invalid arg {}".format(flat_list))
-        return None
-
-    keys = flat_list[0::2]
-    if pre_convert_key_fn:
-        keys = map(pre_convert_key_fn, keys)
-    if not all(key in dictionary for key in keys):
-        print("ERROR: given key(s) does not exist: {}".format(keys))
-        return None
-
-    keys = map(key_map_fn, flat_list[0::2])
-    values = map(val_map_fn, flat_list[1::2])
-    
-    if any(val < 0 for val in values):
-        print("ERROR: Invalid values: {}".format(values))
-        return None
-    
-    return zip(keys, values)
