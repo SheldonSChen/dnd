@@ -76,6 +76,7 @@ class DndShell(cmd.Cmd):
         else:
             get_slots(int(arg))
 
+    # Unnecessary?
     def do_set_slots(self, arg):
         '''Sets the currently available spell slots.
             (dnd) set_slots <level> <slot> ...
@@ -88,6 +89,7 @@ class DndShell(cmd.Cmd):
         if pairs_list:
             set_slots(pairs_list)
     
+    # Unnecessary?
     def do_reset_slots(self, arg):
         '''Resets the currently available spell slots to max.
             (dnd) reset_slots
@@ -172,14 +174,13 @@ class DndShell(cmd.Cmd):
         '''Take a long rest.
             (dnd) long_rest
         '''
-        # TODO: restore things after long rest
-        # long_rest()
-        print("NOT YET")
+        long_rest()
 
     def do_exit(self, arg):
         '''Exits the shell.
             (dnd) exit
         '''
+        #TODO: printing long_rest usage
         print('Thank you for using Dnd.')
         print('Please change the following in the code:')
         print('')
@@ -188,6 +189,8 @@ class DndShell(cmd.Cmd):
         get_money()
         print('')
         get_hp()
+        print('')
+        get_long_spell_usage()
         print('')
         return True
 

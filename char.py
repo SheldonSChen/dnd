@@ -2,6 +2,8 @@ from __future__ import print_function
 from sharedHelpers import *
 
 ############### Char Stats ##############
+LEVEL = 3
+
 CHAR_MODS = {
     "str": 0,
     "dex": 0,
@@ -61,14 +63,14 @@ CHAR_STATS = {
     "spell save dc": 8 + CHAR_MODS["wis"] + PROF,
 }
 
+MAX_HP = 18
+CUR_HP = 18
+
 ############### Money ###############
 # Only the wealthy have platinum
 COINAGES = ["copper", "silver", "gold", "platinum"]
 EXCHANGE = [1, 10, 100, 1000]
 MONEY = [0, 13, 42, 0]
-
-MAX_HP = 18
-CUR_HP = 18
 
 ############### Weapons ##############
 WEAPONS = {
@@ -85,15 +87,6 @@ WEAPONS = {
 }
 
 ############### Spells ##############
-'''
-Making a spell attack = 1d20 + Spell Attack Bonus
-Spell Attack Bonus = Proficiency + Wisdom mod
-
-TODO: attack bonus
-different die and mods for each spell perhaps
-cast spells at specific levels
-other spells on first page - once every long_rest 
-'''
 SPELLS = {
     # Level 0 (Cantrips)
     "light": {
@@ -201,29 +194,44 @@ SPELLS = {
         },
 }
 
-# LONG_REST_SPELLS = {
-#     "healing hands": {
-#         "uses": 1,
-#         "max uses": 1,
-#         },
-#     "turn undead": {
-
-#         },
-#     "path to the grave": {
-
-#         },
-#     "necrotic shroud": {
-#         "uses": 1,
-#         "max uses": 1
-#         },
-#     "circle of mortality": {
-
-#         },
-#     "eyes of the grave": {
-#         "uses": CHAR_STATS["wis"]
-#         "max uses": CHAR_STATS["wis"]
-#         },
-# }
+#TODO: get set reset uses
+LONG_REST_SPELLS = {
+    "healing hands": {
+        # touch
+        # Regain level HP
+        "uses": 1,
+        "max uses": 1,
+        "action":
+            lambda: print("Target regained {} HP".format(LEVEL))
+        },
+    "turn undead": {
+        # 30ft
+        # WIS save or undead turned
+        },
+    "path to the grave": {
+        # 30ft
+        # Target vulnerable to all of attack's damage.
+        },
+    "necrotic shroud": {
+        # 10ft
+        # CHA save or be frightened
+        # TODO: LEVEL extra necrotic damage for attacks/spells
+        "uses": 1,
+        "max uses": 1,
+        },
+    "circle of mortality": {
+        # When healing 0 HP creature, 
+        # use max of each dice instead.
+        },
+    "eyes of the grave": {
+        # 60ft
+        # Until end of next turn,
+        # know location of any undead
+        # that's not hidden or protected.
+        "uses": CHAR_STATS["wis"],
+        "max uses": CHAR_STATS["wis"],
+        },
+}
 
 SPELL_SLOTS_MAX = {
     1: 4,
@@ -250,10 +258,30 @@ def print_cur_money(money, coinages):
     val = val[: -2]
     print(val)
 
-def print_cur_spell_slots(spell_slots_remain):
+def print_cur_spell_slots(spell_slots_remain, level=None):
+    def print_slots(level):
+        print("lvl {}: {}".format(level, spell_slots_remain[level]))
+
     print("Current spell slots:")
-    val = ""
-    for level in spell_slots_remain:
-        val += "lvl {}: {}, ".format(level, spell_slots_remain[level])
-    val = val[: -2]
-    print(val)
+    if not level:
+        for lvl in spell_slots_remain:
+            print_slots(lvl)
+    elif level in spell_slots_remain:
+        print_slots(level)
+    else:
+        print("ERROR: level {} not found".format(level))
+
+def print_long_rest_spells(long_rest_spells, spell=None):
+    def print_spell(spell):
+        if "uses" in long_rest_spells[spell]:
+            uses = long_rest_spells[spell]["uses"]
+            print("{}: {} uses remain".format(spell, uses))
+        
+    print("Current long spell usages left:")
+    if not spell:
+        for spl in long_rest_spells:
+            print_spell(spl)
+    elif spell in long_rest_spells:
+        print_spell(spell)
+    else:
+        print("ERROR: long spell {} not found".format(spell))

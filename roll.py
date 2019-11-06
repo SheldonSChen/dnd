@@ -21,58 +21,61 @@ def damage(weapon):
 
 def cast(spell, level=None):
     '''
-    Casts a spell.
+    Casts a spell or long rest spell.
 
     Args:
         spell (str): The spell to be cast.
         level (int): The level at which to cast the spell. (default=None)
     '''
     # TODO: incorporate LONG_REST_SPELLS
-    if spell not in SPELLS:
+    if spell in SPELLS:
+        # spell prepared? (level 0 always prepared)
+        if SPELLS[spell]["level"] > 0 and not SPELLS[spell]["prepared"]:
+            print("ERROR: {} is not prepared. Cannot be cast".format(spell))
+            return
+        
+        # cast level greater than base level?
+        base_level = SPELLS[spell]["level"]
+        search_slot = False
+        # cast level not specified, default to base, can cast at any higher level
+        if level == None:
+            level = base_level
+            search_slot = True
+        
+        if level < base_level:
+            print("Spell must be cast at level {} or higher.".format(base_level))
+            return
+        
+        # spell slot available? if so, consume
+        cast_level = consume_spell_slot(level, search_slot)
+        if cast_level == None:
+            print("ERROR: Spell slot not available for level {}".format(level))
+            return
+        
+        if "attack roll" in SPELLS[spell]:
+            print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
+        
+        if "self heal" in SPELLS[spell]:
+            hp_change(SPELLS[spell]["self heal"](cast_level))
+
+        if "action" in SPELLS[spell]:
+            SPELLS[spell]["action"](cast_level)
+
+        print("{} was cast at level {}.".format(spell, cast_level))
+    elif spell in LONG_REST_SPELLS:
+        if level != None:
+            print("ERROR: Unnecessary level specified: {}".format(level))
+            return
+        cast_long_spell(spell)
+    else:
         print("ERROR: {} not found".format(spell))
-        return 
-    
-    # spell prepared? (level 0 always prepared)
-    if SPELLS[spell]["level"] > 0 and not SPELLS[spell]["prepared"]:
-        print("ERROR: {} is not prepared. Cannot be cast".format(spell))
-        return
-    
-    # cast level greater than base level?
-    base_level = SPELLS[spell]["level"]
-    search_slot = False
-    # cast level not specified, default to base, can cast at any higher level
-    if not level:
-        level = base_level
-        search_slot = True
-    
-    if level < base_level:
-        print("Spell must be cast at level {} or higher.".format(base_level))
-        return
-    
-    # spell slot available? if so, consume
-    cast_level = consume_spell_slot(level, search_slot)
-    if cast_level == None:
-        print("ERROR: Spell slot not available for level {}".format(level))
-        return
-    
-    if "attack roll" in SPELLS[spell]:
-        print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
-    
-    if "self heal" in SPELLS[spell]:
-        hp_change(SPELLS[spell]["self heal"](cast_level))
 
-    if "action" in SPELLS[spell]:
-        SPELLS[spell]["action"](cast_level)
-
-    print("{} was cast at level {}.".format(spell, cast_level))
+# Can probably combine get_long_spell_usage() and get_slots()
+def get_long_spell_usage(spell=None):
+    print_long_rest_spells(LONG_REST_SPELLS, spell)
 
 def get_slots(level=None):    
-    if not level:
-        print_cur_spell_slots(SPELL_SLOTS_REMAIN)
-    elif level in SPELL_SLOTS_REMAIN:
-        print("lvl {}: {}".format(level, SPELL_SLOTS_REMAIN[level]))
-    else:
-        print("ERROR: level {} not found".format(level))
+    print_cur_spell_slots(SPELL_SLOTS_REMAIN, level)
 
 def set_slots(level_slots):
     levels, slots = zip(*level_slots)
@@ -168,6 +171,13 @@ def hp_change(change):
 def reset_hp():
     set_hp(MAX_HP)
 
+def long_rest():
+    if CUR_HP == 0:
+        print("Long rest cannot restore. 0 HP")
+        return
+    reset_hp()
+    reset_long_spell_uses()
+
 def test(arg):
     print(arg)
 
@@ -215,3 +225,28 @@ def consume_spell_slot(level, search=True):
             break
     
     return consumed
+
+def cast_long_spell(spell):
+    '''
+    Helper function that casts a long rest spell.
+
+    Args:
+        spell (str): The long rest spell to be cast.
+    '''
+    if "uses" in LONG_REST_SPELLS[spell]:
+        if LONG_REST_SPELLS[spell]["uses"] == 0:
+            print("ERROR: Long rest needed to cast {}.".format(spell))
+            return
+        
+        LONG_REST_SPELLS[spell]["uses"] -= 1
+    
+    if "action" in LONG_REST_SPELLS[spell]:
+        LONG_REST_SPELLS[spell]["action"]()
+    
+    print("{} was cast.".format(spell))
+    
+def reset_long_spell_uses():
+    for spell in LONG_REST_SPELLS:
+        if "uses" in LONG_REST_SPELLS[spell]:
+            LONG_REST_SPELLS[spell]["uses"] = LONG_REST_SPELLS[spell]["max uses"]
+    print("Long rest spell usages restored.")
