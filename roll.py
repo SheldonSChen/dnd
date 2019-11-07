@@ -56,7 +56,7 @@ def cast(spell, level=None):
             print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
         
         if "self heal" in SPELLS[spell]:
-            hp_change(SPELLS[spell]["self heal"](cast_level))
+            hp_change(SPELLS[spell]["self heal"](cast_level), True)
 
         if "action" in SPELLS[spell]:
             SPELLS[spell]["action"](cast_level)
@@ -159,13 +159,15 @@ def set_hp(hp, hp_type=None):
 
     get_hp()
 
-def hp_change(change):
+def hp_change(change, temp=False):
     '''
     Player's CUR_HP changes by change points.
     Healed: change > 0
     Damaged: change < 0
     '''
     remaining_hp = CUR_HP + change
+    if not temp and remaining_hp > MAX_HP:
+        remaining_hp = MAX_HP 
     set_hp(remaining_hp)
 
 def reset_hp():
