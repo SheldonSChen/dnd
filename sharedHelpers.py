@@ -4,6 +4,15 @@ def num_in_col(input_col):
     return all(char.isdigit() for char in input_col)
 
 def roll_d(dice, rolls=1):
+    '''Rolls a dice, multiple times if specified, and returns the total.
+
+    Args:
+        dice (int): The number of faces
+        rolls (int): The number of rolls. (default=1)
+    
+    Returns:
+        The total of all of the rolls.
+    '''
     total = 0
     for i in range(rolls):
         total += random.randint(1,dice)

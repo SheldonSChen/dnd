@@ -171,12 +171,33 @@ def hp_change(change):
 def reset_hp():
     set_hp(MAX_HP)
 
+def get_hit_dice():
+    print("Your current number of hit dice: {}".format(CUR_HIT_DICE))
+
+def short_rest(hit_dice):
+    global CUR_HIT_DICE
+    if hit_dice <= 0 or hit_dice > CUR_HIT_DICE:
+        print("ERROR: Invalid number of hit dice: {}. {} currently available".format(hit_dice, CUR_HIT_DICE))
+        return
+    CUR_HIT_DICE -= hit_dice
+    hp_change(roll_d(HIT_DICE_TYPE, hit_dice) + CHAR_STATS["con"])
+
 def long_rest():
     if CUR_HP == 0:
         print("Long rest cannot restore. 0 HP")
         return
     reset_hp()
     reset_long_spell_uses()
+    
+    # restores at least half of total hit dice
+    restored_hit_dice = MAX_HIT_DICE / 2
+    if restored_hit_dice == 0:
+        restored_hit_dice = 1
+    global CUR_HIT_DICE
+    CUR_HIT_DICE += restored_hit_dice
+    if CUR_HIT_DICE > MAX_HIT_DICE:
+        CUR_HIT_DICE = MAX_HIT_DICE
+    get_hit_dice()
 
 def test(arg):
     print(arg)

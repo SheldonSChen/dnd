@@ -63,8 +63,12 @@ CHAR_STATS = {
     "spell save dc": 8 + CHAR_MODS["wis"] + PROF,
 }
 
+MAX_HIT_DICE = LEVEL
+CUR_HIT_DICE = 2
+HIT_DICE_TYPE = 8
+
 MAX_HP = 18
-CUR_HP = 18
+CUR_HP = 13
 
 ############### Money ###############
 # Only the wealthy have platinum
@@ -194,7 +198,6 @@ SPELLS = {
         },
 }
 
-#TODO: get set reset uses
 LONG_REST_SPELLS = {
     "healing hands": {
         # touch
@@ -239,7 +242,7 @@ SPELL_SLOTS_MAX = {
 }
 
 SPELL_SLOTS_REMAIN = {
-    1: 4,
+    1: 1,
     2: 2,
 }
 

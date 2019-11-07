@@ -170,6 +170,18 @@ class DndShell(cmd.Cmd):
         '''
         reset_hp()
 
+    def do_short_rest(self, arg):
+        '''Take a short rest. Consumes hit dice for healing.
+            (dnd) short_rest <num hit dice>
+        '''
+        if len(arg) == 0:
+            print("ERROR: Missing arguments.")
+            return
+        if not num_in_col(arg):
+            print("ERROR: not a number: {}".format(arg))
+            return
+        short_rest(int(arg))
+
     def do_long_rest(self, arg):
         '''Take a long rest.
             (dnd) long_rest
@@ -183,6 +195,8 @@ class DndShell(cmd.Cmd):
         #TODO: printing long_rest usage
         print('Thank you for using Dnd.')
         print('Please change the following in the code:')
+        print('')
+        get_hit_dice()
         print('')
         get_slots()
         print('')
