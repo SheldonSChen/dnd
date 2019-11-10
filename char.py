@@ -64,17 +64,20 @@ CHAR_STATS = {
 }
 
 MAX_HIT_DICE = LEVEL
-CUR_HIT_DICE = 2
+# Saved in external file
+# CUR_HIT_DICE = 2
 HIT_DICE_TYPE = 8
 
 MAX_HP = 18
-CUR_HP = 13
+# Saved in external file
+# CUR_HP = 13
 
 ############### Money ###############
 # Only the wealthy have platinum
 COINAGES = ["copper", "silver", "gold", "platinum"]
 EXCHANGE = [1, 10, 100, 1000]
-MONEY = [0, 13, 42, 0]
+# Saved in external file
+# MONEY = [0, 13, 42, 0]
 
 ############### Weapons ##############
 WEAPONS = {
@@ -198,53 +201,56 @@ SPELLS = {
         },
 }
 
-LONG_REST_SPELLS = {
-    "healing hands": {
-        # touch
-        # Regain level HP
-        "uses": 1,
-        "max uses": 1,
-        "action":
-            lambda: print("Target regained {} HP".format(LEVEL))
-        },
-    "turn undead": {
-        # 30ft
-        # WIS save or undead turned
-        },
-    "path to the grave": {
-        # 30ft
-        # Target vulnerable to all of attack's damage.
-        },
-    "necrotic shroud": {
-        # 10ft
-        # CHA save or be frightened
-        # TODO: LEVEL extra necrotic damage for attacks/spells
-        "uses": 1,
-        "max uses": 1,
-        },
-    "circle of mortality": {
-        # When healing 0 HP creature, 
-        # use max of each dice instead.
-        },
-    "eyes of the grave": {
-        # 60ft
-        # Until end of next turn,
-        # know location of any undead
-        # that's not hidden or protected.
-        "uses": CHAR_STATS["wis"],
-        "max uses": CHAR_STATS["wis"],
-        },
-}
+# Saved in external file
+# TODO: separate spells from usage?
+# LONG_REST_SPELLS = {
+#     "healing hands": {
+#         # touch
+#         # Regain level HP
+#         "uses": 1,
+#         "max uses": 1,
+#         "action":
+#             lambda: print("Target regained {} HP".format(LEVEL))
+#         },
+#     "turn undead": {
+#         # 30ft
+#         # WIS save or undead turned
+#         },
+#     "path to the grave": {
+#         # 30ft
+#         # Target vulnerable to all of attack's damage.
+#         },
+#     "necrotic shroud": {
+#         # 10ft
+#         # CHA save or be frightened
+#         # TODO: LEVEL extra necrotic damage for attacks/spells
+#         "uses": 1,
+#         "max uses": 1,
+#         },
+#     "circle of mortality": {
+#         # When healing 0 HP creature, 
+#         # use max of each dice instead.
+#         },
+#     "eyes of the grave": {
+#         # 60ft
+#         # Until end of next turn,
+#         # know location of any undead
+#         # that's not hidden or protected.
+#         "uses": CHAR_STATS["wis"],
+#         "max uses": CHAR_STATS["wis"],
+#         },
+# }
 
 SPELL_SLOTS_MAX = {
     1: 4,
     2: 2,
 }
 
-SPELL_SLOTS_REMAIN = {
-    1: 1,
-    2: 2,
-}
+# Saved in external file
+# SPELL_SLOTS_REMAIN = {
+#     1: 1,
+#     2: 2,
+# }
 
 ############### Helper Fn ###############
 def coin_to_index(coin, coinages):

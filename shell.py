@@ -8,6 +8,12 @@ class DndShell(cmd.Cmd):
     prompt = '(dnd) '
     file = None
 
+    def preloop(self):
+        '''Hook method executed once when cmdloop() is called.
+            In this case, calls ---- to load character data.
+        '''
+        load_char_data()
+
     def precmd(self, line):
         '''Prepare given user input for interpretation by other do_xxx() funcs.
             Simply strips trailing whitespaces.
@@ -192,20 +198,8 @@ class DndShell(cmd.Cmd):
         '''Exits the shell.
             (dnd) exit
         '''
-        #TODO: printing long_rest usage
         print('Thank you for using Dnd.')
-        print('Please change the following in the code:')
-        print('')
-        get_hit_dice()
-        print('')
-        get_slots()
-        print('')
-        get_money()
-        print('')
-        get_hp()
-        print('')
-        get_long_spell_usage()
-        print('')
+        save_char_data()
         return True
 
 ############### Helper Fn ###############

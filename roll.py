@@ -1,3 +1,4 @@
+import dill
 from char import *
 from sharedHelpers import *
 # TODO: rolling w/ ADVANTAGE, and boosts!
@@ -27,7 +28,6 @@ def cast(spell, level=None):
         spell (str): The spell to be cast.
         level (int): The level at which to cast the spell. (default=None)
     '''
-    # TODO: incorporate LONG_REST_SPELLS
     if spell in SPELLS:
         # spell prepared? (level 0 always prepared)
         if SPELLS[spell]["level"] > 0 and not SPELLS[spell]["prepared"]:
@@ -273,3 +273,36 @@ def reset_long_spell_uses():
         if "uses" in LONG_REST_SPELLS[spell]:
             LONG_REST_SPELLS[spell]["uses"] = LONG_REST_SPELLS[spell]["max uses"]
     print("Long rest spell usages restored.")
+
+def save_char_data():
+    '''Saves character data into a JSON file.
+        Only saves values that may change during play.
+        Hit dice, spell slots, money, hp, long spell usage.
+    '''
+    data = {}
+    data["CUR_HIT_DICE"] = CUR_HIT_DICE
+    data["CUR_HP"] = CUR_HP
+    data["MONEY"] = MONEY
+    data["LONG_REST_SPELLS"] = LONG_REST_SPELLS
+    data["SPELL_SLOTS_REMAIN"] = SPELL_SLOTS_REMAIN
+
+    with open('data.txt', 'w') as outfile:
+        dill.dump(data, outfile)
+        outfile.close()
+
+def load_char_data():
+    '''Saves character data into a JSON file.
+        Only saves values that may change during play.
+        Hit dice, spell slots, money, hp, long spell usage.
+    '''
+
+    with open('data.txt', 'r') as infile:
+        data = dill.load(infile)
+        infile.close()
+    
+    global CUR_HIT_DICE, CUR_HP, MONEY, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN
+    CUR_HIT_DICE = data["CUR_HIT_DICE"]
+    CUR_HP = data["CUR_HP"]
+    MONEY = data["MONEY"]
+    LONG_REST_SPELLS = data["LONG_REST_SPELLS"]
+    SPELL_SLOTS_REMAIN = data["SPELL_SLOTS_REMAIN"]
