@@ -180,19 +180,29 @@ class DndShell(cmd.Cmd):
         '''Take a short rest. Consumes hit dice for healing.
             (dnd) short_rest <num hit dice>
         '''
-        if len(arg) == 0:
-            print("ERROR: Missing arguments.")
-            return
-        if not num_in_col(arg):
+        if len(arg) > 0 and not num_in_col(arg):
             print("ERROR: not a number: {}".format(arg))
             return
-        short_rest(int(arg))
+
+        if len(arg) == 0:
+            short_rest()
+        else:
+            short_rest(int(arg))
 
     def do_long_rest(self, arg):
         '''Take a long rest.
             (dnd) long_rest
         '''
         long_rest()
+
+    def do_print_dict(self, arg):
+        '''Prints dict for testing purposes.
+            (dnd) print <DICT>
+        '''
+        if len(arg) == 0:
+            print("ERROR: Missing arguments.")
+            return
+        print_dict(arg)
 
     def do_exit(self, arg):
         '''Exits the shell.

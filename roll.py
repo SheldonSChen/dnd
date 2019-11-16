@@ -62,11 +62,16 @@ def cast(spell, level=None):
             SPELLS[spell]["action"](cast_level)
 
         print("{} was cast at level {}.".format(spell, cast_level))
+    elif spell in CHANNEL_DIVINITIES:
+        if level != None:
+            print("ERROR: Unnecessary level specified: {}".format(level))
+            return
+        cast_special_spell(spell, CHANNEL_DIVINITIES)
     elif spell in LONG_REST_SPELLS:
         if level != None:
             print("ERROR: Unnecessary level specified: {}".format(level))
             return
-        cast_long_spell(spell)
+        cast_special_spell(spell, LONG_REST_SPELLS)
     else:
         print("ERROR: {} not found".format(spell))
 
@@ -176,20 +181,24 @@ def reset_hp():
 def get_hit_dice():
     print("Your current number of hit dice: {}".format(CUR_HIT_DICE))
 
-def short_rest(hit_dice):
+def short_rest(hit_dice=0):
+    reset_spell_uses(CHANNEL_DIVINITIES, "Channel Divinity")
+
     global CUR_HIT_DICE
-    if hit_dice <= 0 or hit_dice > CUR_HIT_DICE:
+    if hit_dice < 0 or hit_dice > CUR_HIT_DICE:
         print("ERROR: Invalid number of hit dice: {}. {} currently available".format(hit_dice, CUR_HIT_DICE))
         return
-    CUR_HIT_DICE -= hit_dice
-    hp_change(roll_d(HIT_DICE_TYPE, hit_dice) + CHAR_STATS["con"])
+    if hit_dice > 0:
+        CUR_HIT_DICE -= hit_dice
+        hp_change(roll_d(HIT_DICE_TYPE, hit_dice) + CHAR_STATS["con"])
 
 def long_rest():
     if CUR_HP == 0:
         print("Long rest cannot restore. 0 HP")
         return
     reset_hp()
-    reset_long_spell_uses()
+    reset_spell_uses(CHANNEL_DIVINITIES, "Channel Divinity")
+    reset_spell_uses(LONG_REST_SPELLS, "Long rest")
     
     # restores at least half of total hit dice
     restored_hit_dice = MAX_HIT_DICE / 2
@@ -201,10 +210,10 @@ def long_rest():
         CUR_HIT_DICE = MAX_HIT_DICE
     get_hit_dice()
 
-def test(arg):
-    print(arg)
-
 ############### Helper Fn ###############
+def print_dict(arg):
+    print(globals()[arg])
+
 def action(arg, dictionary, dice, bonus_sub_cats):
     '''
     Rolls a dice and adds corresponding bonuses.
@@ -249,30 +258,31 @@ def consume_spell_slot(level, search=True):
     
     return consumed
 
-def cast_long_spell(spell):
+def cast_special_spell(spell, dict_type):
     '''
-    Helper function that casts a long rest spell.
+    Helper function that casts a channel divinity or long rest spell.
 
     Args:
-        spell (str): The long rest spell to be cast.
+        spell (str): The special spell to be cast.
+        dict_type (dict): Either CHANNEL_DIVINITIES or LONG_REST_SPELLS
     '''
-    if "uses" in LONG_REST_SPELLS[spell]:
-        if LONG_REST_SPELLS[spell]["uses"] == 0:
-            print("ERROR: Long rest needed to cast {}.".format(spell))
+    if "uses" in dict_type[spell]:
+        if dict_type[spell]["uses"] == 0:
+            print("ERROR: Rest needed to cast {}.".format(spell))
             return
         
-        LONG_REST_SPELLS[spell]["uses"] -= 1
+        dict_type[spell]["uses"] -= 1
     
-    if "action" in LONG_REST_SPELLS[spell]:
-        LONG_REST_SPELLS[spell]["action"]()
+    if "action" in dict_type[spell]:
+        dict_type[spell]["action"]()
     
     print("{} was cast.".format(spell))
-    
-def reset_long_spell_uses():
-    for spell in LONG_REST_SPELLS:
-        if "uses" in LONG_REST_SPELLS[spell]:
-            LONG_REST_SPELLS[spell]["uses"] = LONG_REST_SPELLS[spell]["max uses"]
-    print("Long rest spell usages restored.")
+
+def reset_spell_uses(dict_type, spell_type):
+    for spell in dict_type:
+        if "uses" in dict_type[spell]:
+            dict_type[spell]["uses"] = dict_type[spell]["max uses"]
+    print(spell_type + " spell usages restored.")
 
 def save_char_data():
     '''Saves character data into a JSON file.
@@ -283,6 +293,7 @@ def save_char_data():
     data["CUR_HIT_DICE"] = CUR_HIT_DICE
     data["CUR_HP"] = CUR_HP
     data["MONEY"] = MONEY
+    data["CHANNEL_DIVINITIES"] = CHANNEL_DIVINITIES
     data["LONG_REST_SPELLS"] = LONG_REST_SPELLS
     data["SPELL_SLOTS_REMAIN"] = SPELL_SLOTS_REMAIN
 
@@ -304,5 +315,6 @@ def load_char_data():
     CUR_HIT_DICE = data["CUR_HIT_DICE"]
     CUR_HP = data["CUR_HP"]
     MONEY = data["MONEY"]
+    CHANNEL_DIVINITIES = data["CHANNEL_DIVINITIES"]
     LONG_REST_SPELLS = data["LONG_REST_SPELLS"]
     SPELL_SLOTS_REMAIN = data["SPELL_SLOTS_REMAIN"]

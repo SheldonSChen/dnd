@@ -28,6 +28,9 @@ CHAR_STATS = {
     "sleight":    CHAR_MODS["dex"],
     "stealth":    CHAR_MODS["dex"],
 
+    # Initiative is just dex check.
+    "initiative": CHAR_MODS["dex"],
+
     # CONSTITUTION
     "con":      CHAR_MODS["con"],
     "con save": CHAR_MODS["con"],
@@ -201,8 +204,30 @@ SPELLS = {
         },
 }
 
+CHANNEL_DIVINITY_USES = 1
 # Saved in external file
-# TODO: separate spells from usage?
+# CHANNEL_DIVINITIES = {
+#     "turn undead": {
+#         # 30ft
+#         # WIS save or undead turned
+#         "uses": CHANNEL_DIVINITY_USES,
+#         "max uses": CHANNEL_DIVINITY_USES,
+#         },
+#     "path to the grave": {
+#         # 30ft
+#         # Target vulnerable to all of attack's damage.
+#         "uses": CHANNEL_DIVINITY_USES,
+#         "max uses": CHANNEL_DIVINITY_USES,
+#         },
+#     "circle of mortality": {
+#         # When healing 0 HP creature, 
+#         # use max of each dice instead.
+#         "uses": CHANNEL_DIVINITY_USES,
+#         "max uses": CHANNEL_DIVINITY_USES,
+#         },
+# }
+
+# Saved in external file
 # LONG_REST_SPELLS = {
 #     "healing hands": {
 #         # touch
@@ -212,24 +237,12 @@ SPELLS = {
 #         "action":
 #             lambda: print("Target regained {} HP".format(LEVEL))
 #         },
-#     "turn undead": {
-#         # 30ft
-#         # WIS save or undead turned
-#         },
-#     "path to the grave": {
-#         # 30ft
-#         # Target vulnerable to all of attack's damage.
-#         },
 #     "necrotic shroud": {
 #         # 10ft
 #         # CHA save or be frightened
 #         # TODO: LEVEL extra necrotic damage for attacks/spells
 #         "uses": 1,
 #         "max uses": 1,
-#         },
-#     "circle of mortality": {
-#         # When healing 0 HP creature, 
-#         # use max of each dice instead.
 #         },
 #     "eyes of the grave": {
 #         # 60ft
