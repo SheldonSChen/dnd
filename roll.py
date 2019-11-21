@@ -311,7 +311,7 @@ def load_char_data():
         data = dill.load(infile)
         infile.close()
     
-    global CUR_HIT_DICE, CUR_HP, MONEY, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN
+    global CUR_HIT_DICE, CUR_HP, MONEY, CHANNEL_DIVINITIES, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN
     CUR_HIT_DICE = data["CUR_HIT_DICE"]
     CUR_HP = data["CUR_HP"]
     MONEY = data["MONEY"]
