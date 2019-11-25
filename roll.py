@@ -56,7 +56,7 @@ def cast(spell, level=None):
             print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
         
         if "self heal" in SPELLS[spell]:
-            hp_change(SPELLS[spell]["self heal"](cast_level), True)
+            hp_change(SPELLS[spell]["self heal"](cast_level), temp=True)
 
         if "action" in SPELLS[spell]:
             SPELLS[spell]["action"](cast_level)
@@ -164,19 +164,84 @@ def set_hp(hp, hp_type=None):
 
     get_hp()
 
-def hp_change(change, temp=False):
+def hp_change(change, temp=False, critical=False):
     '''
     Player's CUR_HP changes by change points.
+    If temp, then it can exceed MAX_HP
+    Damage can be a critical hit.
+
     Healed: change > 0
     Damaged: change < 0
     '''
+
+    global DEATH_SAVE_SUCCESS, DEATH_SAVE_FAILURE
+    if CUR_HP <= 0 and change < 0:
+        if abs(change) >= MAX_HP:
+            #immediate death
+            while DEATH_SAVE_FAILURE < 3:
+                death_save(2, False) # rolling a 2 counts as one failure
+        elif critical:
+            death_save(1) # rolling a 1 counts as two failures
+        else:
+            death_save(2) # rolling a 2 counts as one failure
+        
+        return
+
+    if CUR_HP == 0 and change > 0:
+        DEATH_SAVE_SUCCESS = 0
+        DEATH_SAVE_FAILURE = 0
+    
     remaining_hp = CUR_HP + change
     if not temp and remaining_hp > MAX_HP:
-        remaining_hp = MAX_HP 
+        remaining_hp = MAX_HP
+    elif change < 0 and abs(remaining_hp) >= MAX_HP:
+        #immediate death
+        while DEATH_SAVE_FAILURE < 3:
+            death_save(2, False) # rolling a 2 counts as one failure
+        remaining_hp = 0
+    elif remaining_hp < 0:
+        remaining_hp = 0
     set_hp(remaining_hp)
 
 def reset_hp():
     set_hp(MAX_HP)
+
+def death_save(roll_val=None, print_=True):
+    if CUR_HP != 0:
+        print("ERROR: No need to roll death save. {} HP".format(CUR_HP))
+        return
+
+    if not roll_val:
+        roll_val = roll_d(20)
+
+    global DEATH_SAVE_SUCCESS, DEATH_SAVE_FAILURE
+    num = 0
+    success_or_failure = ""
+    if roll_val == 20:
+        print("You rolled a 20! You're now stable with 1 HP.")
+        hp_change(1)
+        return
+    elif roll_val == 1:
+        num = 2
+        success_or_failure = "failures"
+        DEATH_SAVE_FAILURE += num
+    elif roll_val < 10:
+        num = 1
+        success_or_failure = "failure"
+        DEATH_SAVE_FAILURE += num
+    else:
+        num = 1
+        success_or_failure = "success"
+        DEATH_SAVE_SUCCESS += num
+    
+    if print_:
+        print("You rolled a {}. That's {} {}.".format(roll_val, num, success_or_failure))
+
+    if DEATH_SAVE_SUCCESS >= 3:
+        print("You're now stable with 1 HP.")
+        hp_change(1)
+    elif DEATH_SAVE_FAILURE >= 3:
+        print("Oh no you died!")
 
 def get_hit_dice():
     print("Your current number of hit dice: {}".format(CUR_HIT_DICE))
@@ -292,6 +357,8 @@ def save_char_data():
     data = {}
     data["CUR_HIT_DICE"] = CUR_HIT_DICE
     data["CUR_HP"] = CUR_HP
+    data["DEATH_SAVE_SUCCESS"] = DEATH_SAVE_SUCCESS
+    data["DEATH_SAVE_FAILURE"] = DEATH_SAVE_FAILURE
     data["MONEY"] = MONEY
     data["CHANNEL_DIVINITIES"] = CHANNEL_DIVINITIES
     data["LONG_REST_SPELLS"] = LONG_REST_SPELLS
@@ -311,9 +378,11 @@ def load_char_data():
         data = dill.load(infile)
         infile.close()
     
-    global CUR_HIT_DICE, CUR_HP, MONEY, CHANNEL_DIVINITIES, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN
+    global CUR_HIT_DICE, CUR_HP, MONEY, CHANNEL_DIVINITIES, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN, DEATH_SAVE_SUCCESS, DEATH_SAVE_FAILURE
     CUR_HIT_DICE = data["CUR_HIT_DICE"]
     CUR_HP = data["CUR_HP"]
+    DEATH_SAVE_SUCCESS = data["DEATH_SAVE_SUCCESS"]
+    DEATH_SAVE_FAILURE = data["DEATH_SAVE_FAILURE"]
     MONEY = data["MONEY"]
     CHANNEL_DIVINITIES = data["CHANNEL_DIVINITIES"]
     LONG_REST_SPELLS = data["LONG_REST_SPELLS"]

@@ -160,9 +160,26 @@ class DndShell(cmd.Cmd):
     
     def do_lose_hp(self, arg):
         '''Decreases current HP by damage taken.
-            (dnd) lose_hp <damage>
+            (dnd) lose_hp <damage> <"critical" (optional)>
         '''
-        do_hp_change(arg, -1)
+        if len(arg) == 0:
+            print("ERROR: Missing arguments.")
+            return
+        args = arg.split()
+        if not num_in_col(args[0]):
+            print("ERROR: Invalid damage: {}".format(args[0]))
+            return
+        if len(args) == 2 and args[1] != "critical":
+            print("ERROR: Invalid damage type: {}".format(args[1]))
+            return
+        if len(args) > 2:
+            print("ERROR: Invalid arg length: {}".format(args))
+            return 
+
+        if len(args) == 1:
+            do_hp_change(arg, -1)
+        else:
+            do_hp_change(arg[0], -1, True)
     
     def do_gain_hp(self, arg):
         '''Increases current HP by amount healed.
@@ -174,7 +191,19 @@ class DndShell(cmd.Cmd):
         '''Resets the current HP to max.
             (dnd) reset_hp
         '''
+        if len(arg) > 0:
+            print("ERROR: Unnecesary arguments: {}".format(arg))
+            return
         reset_hp()
+    
+    def do_death_save(self, arg):
+        '''Makes a death saving throw.
+            (dnd) death_save
+        '''
+        if len(arg) > 0:
+            print("ERROR: Unnecesary arguments: {}".format(arg))
+            return
+        death_save()
 
     def do_short_rest(self, arg):
         '''Take a short rest. Consumes hit dice for healing.
@@ -193,6 +222,9 @@ class DndShell(cmd.Cmd):
         '''Take a long rest.
             (dnd) long_rest
         '''
+        if len(arg) > 0:
+            print("ERROR: Unnecesary arguments: {}".format(arg))
+            return
         long_rest()
 
     def do_print_dict(self, arg):
@@ -208,6 +240,9 @@ class DndShell(cmd.Cmd):
         '''Exits the shell.
             (dnd) exit
         '''
+        if len(arg) > 0:
+            print("ERROR: Unnecesary arguments: {}".format(arg))
+            return
         print('Thank you for using Dnd.')
         save_char_data()
         return True
@@ -221,14 +256,15 @@ def do_transaction(arg, earn_or_spend):
     if pairs_list:
         transaction(pairs_list, earn_or_spend)
 
-def do_hp_change(arg, sign):
+def do_hp_change(arg, sign, critical=False):
     if len(arg) == 0:
         print("ERROR: Missing arguments.")
         return
     if not num_in_col(arg):
-        print("ERROR: Invalid damage value: {}".format(arg))
+        heal_damage = "heal" if sign >= 1 else "damage"
+        print("ERROR: Invalid {} value: {}".format(heal_damage, arg))
         return
-    hp_change(int(arg) * sign)
+    hp_change(int(arg) * sign, critical=critical)
 
 ############### Main Fn ###############
 if __name__ == '__main__':

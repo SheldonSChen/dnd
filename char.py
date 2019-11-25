@@ -75,6 +75,10 @@ MAX_HP = 18
 # Saved in external file
 # CUR_HP = 13
 
+# Saved in external file
+# DEATH_SAVE_SUCCESS = 0
+# DEATH_SAVE_FAILURE = 0
+
 ############### Money ###############
 # Only the wealthy have platinum
 COINAGES = ["copper", "silver", "gold", "platinum"]
