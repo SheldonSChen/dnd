@@ -79,6 +79,13 @@ MAX_HP = 18
 # DEATH_SAVE_SUCCESS = 0
 # DEATH_SAVE_FAILURE = 0
 
+# Saved in external file
+BONUSES = {
+    "attack": [],
+    "damage": [],
+    "save": [],
+}
+
 ############### Money ###############
 # Only the wealthy have platinum
 COINAGES = ["copper", "silver", "gold", "platinum"]
@@ -118,8 +125,8 @@ SPELLS = {
         # WIS save or 1d8 necrotic damage
         # 1d12 if target is missing any HP 
         "level": 0,
-        "action":
-            lambda _: print("d8: {} or d12: {} necrotic damage".format(roll_d(8), roll_d(12)))
+        "damage":
+            lambda _: [roll_d(8), roll_d(12)]
         },
     "resistance": {
         # touch
@@ -130,8 +137,8 @@ SPELLS = {
         # 5ft, choose target(s)
         # CON save or 1d6 radiant damage
         "level": 0,
-        "action": 
-            lambda _: print("{} radiant damage".format(roll_d(6)))
+        "damage": 
+            lambda _: [roll_d(6)]
         },
     
     # Level 1
@@ -162,8 +169,8 @@ SPELLS = {
         "level": 1,
         "prepared": True,
         "attack roll": True,
-        "action":
-            lambda cast_level: print("{} necrotic damage".format(roll_d(10, cast_level + 2)))
+        "damage":
+            lambda cast_level: [roll_d(10, cast_level + 2)]
         },
     "bless": {
         # 30ft, up to (2 + cast level) targets
@@ -177,8 +184,8 @@ SPELLS = {
         # Regain (cast level)d4 + CHAR_STATS["wis"] HP
         "level": 1,
         "prepared": True,
-        "action":
-            lambda cast_level: print("Target regained {} HP".format(roll_d(4, cast_level) + CHAR_STATS["wis"]))
+        "heal":
+            lambda cast_level: roll_d(4, cast_level) + CHAR_STATS["wis"]
         },
     "protection from evil and good": {
         # touch
@@ -197,8 +204,8 @@ SPELLS = {
         # Each regain (cast level)d8 + CHAR_STATS["wis"] HP
         "level": 2,
         "prepared": True,
-        "action":
-            lambda cast_level: print("Target(s) regained {} HP".format(roll_d(8, cast_level) + CHAR_STATS["wis"]))
+        "heal":
+            lambda cast_level: roll_d(8, cast_level) + CHAR_STATS["wis"]
         },
     "aid": {
         # 30ft, choose up to 3 allies

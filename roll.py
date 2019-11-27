@@ -12,13 +12,16 @@ def get(stat):
     print(CHAR_STATS[stat])
 
 def check(stat):
-    action(stat, CHAR_STATS, 20, [])
+    if "save" in stat:
+        action(stat, CHAR_STATS, 20, [], "save")
+    else:
+        action(stat, CHAR_STATS, 20, [])
 
 def attack(weapon):
-    action(weapon, WEAPONS, 20, ["mod", "prof"])
+    action(weapon, WEAPONS, 20, ["mod", "prof"], "attack")
 
 def damage(weapon):
-    action(weapon, WEAPONS, "dice", ["mod"])
+    action(weapon, WEAPONS, "dice", ["mod"], "damage")
 
 def cast(spell, level=None):
     '''
@@ -53,27 +56,40 @@ def cast(spell, level=None):
             return
         
         if "attack roll" in SPELLS[spell]:
-            print("Spell attack: {}".format(roll_d(20) + CHAR_STATS["spell attack"]))
+            total_bonus = CHAR_STATS["spell attack"] + roll_bonuses("attack")
+            print("Spell attack: {}".format(roll_d(20) + total_bonus))
+        
+        if "damage" in SPELLS[spell]:
+            total_bonus = roll_bonuses("damage")
+            for possible_damage in SPELLS[spell]["damage"](cast_level):
+                print("Spell damage: {}".format(possible_damage + total_bonus))
         
         if "self heal" in SPELLS[spell]:
             hp_change(SPELLS[spell]["self heal"](cast_level), temp=True)
 
-        if "action" in SPELLS[spell]:
-            SPELLS[spell]["action"](cast_level)
+        if "heal" in SPELLS[spell]:
+            print("Target(s) regained {} HP".format(SPELLS[spell]["heal"](cast_level)))
 
         print("{} was cast at level {}.".format(spell, cast_level))
-    elif spell in CHANNEL_DIVINITIES:
-        if level != None:
-            print("ERROR: Unnecessary level specified: {}".format(level))
-            return
-        cast_special_spell(spell, CHANNEL_DIVINITIES)
-    elif spell in LONG_REST_SPELLS:
-        if level != None:
-            print("ERROR: Unnecessary level specified: {}".format(level))
-            return
-        cast_special_spell(spell, LONG_REST_SPELLS)
     else:
-        print("ERROR: {} not found".format(spell))
+        if level != None:
+            print("ERROR: Unnecessary level specified: {}".format(level))
+            return
+            
+        if spell in CHANNEL_DIVINITIES:
+            cast_special_spell(spell, CHANNEL_DIVINITIES)
+        elif spell in LONG_REST_SPELLS:
+            cast_special_spell(spell, LONG_REST_SPELLS)
+        else:
+            print("ERROR: {} not found".format(spell))
+
+def bonus(die, target, num_turns):
+    if num_turns > 0:
+        global BONUSES
+        BONUSES[target].append({
+            "die": die, 
+            "num_turns": num_turns,
+            })
 
 # Can probably combine get_long_spell_usage() and get_slots()
 def get_long_spell_usage(spell=None):
@@ -279,26 +295,39 @@ def long_rest():
 def print_dict(arg):
     print(globals()[arg])
 
-def action(arg, dictionary, dice, bonus_sub_cats):
+def action(arg, dictionary, dice, mod_prof, action_type=None):
     '''
     Rolls a dice and adds corresponding bonuses.
-    dice           - either num or "dice" if dependent on arg
-    bonus_sub_cats - list of sub categories for dictionary[arg]
+    dice        - either num or "dice" if dependent on arg
+    mod_prof    - list of sub categories for dictionary[arg]
+    action_type - type of action
     '''
 
     if arg not in dictionary:
         print("ERROR: {} not found".format(arg))
         return 
     
-    bonus = 0
-    if len(bonus_sub_cats) == 0:
-        bonus = dictionary[arg]
+    total_bonus = 0
+    if len(mod_prof) == 0:
+        total_bonus = dictionary[arg]
     else:
-        for cat in bonus_sub_cats:
-            bonus += dictionary[arg][cat]
+        for category in mod_prof:
+            total_bonus += dictionary[arg][category]
+    
+    if action_type:
+        total_bonus += roll_bonuses(action_type)    
     
     n = dictionary[arg][dice] if dice == "dice" else dice
-    print(roll_d(n) + bonus)
+    print(roll_d(n) + total_bonus)
+
+def roll_bonuses(action_type):
+    total_bonus = 0
+    global BONUSES
+    for i in range(len(BONUSES[action_type])):
+        total_bonus += roll_d(BONUSES[action_type][i]["die"])
+        BONUSES[action_type][i]["num_turns"] -= 1
+    BONUSES[action_type] = [b for b in BONUSES[action_type] if b["num_turns"] > 0]
+    return total_bonus
 
 def consume_spell_slot(level, search=True):
     '''
@@ -331,12 +360,11 @@ def cast_special_spell(spell, dict_type):
         spell (str): The special spell to be cast.
         dict_type (dict): Either CHANNEL_DIVINITIES or LONG_REST_SPELLS
     '''
-    if "uses" in dict_type[spell]:
-        if dict_type[spell]["uses"] == 0:
-            print("ERROR: Rest needed to cast {}.".format(spell))
-            return
-        
-        dict_type[spell]["uses"] -= 1
+    if dict_type[spell]["uses"] == 0:
+        print("ERROR: Rest needed to cast {}.".format(spell))
+        return
+    
+    dict_type[spell]["uses"] -= 1
     
     if "action" in dict_type[spell]:
         dict_type[spell]["action"]()
@@ -359,6 +387,7 @@ def save_char_data():
     data["CUR_HP"] = CUR_HP
     data["DEATH_SAVE_SUCCESS"] = DEATH_SAVE_SUCCESS
     data["DEATH_SAVE_FAILURE"] = DEATH_SAVE_FAILURE
+    data["BONUSES"] = BONUSES
     data["MONEY"] = MONEY
     data["CHANNEL_DIVINITIES"] = CHANNEL_DIVINITIES
     data["LONG_REST_SPELLS"] = LONG_REST_SPELLS
@@ -378,11 +407,13 @@ def load_char_data():
         data = dill.load(infile)
         infile.close()
     
+    # global CUR_HIT_DICE, CUR_HP, MONEY, CHANNEL_DIVINITIES, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN, DEATH_SAVE_SUCCESS, DEATH_SAVE_FAILURE, BONUSES
     global CUR_HIT_DICE, CUR_HP, MONEY, CHANNEL_DIVINITIES, LONG_REST_SPELLS, SPELL_SLOTS_REMAIN, DEATH_SAVE_SUCCESS, DEATH_SAVE_FAILURE
     CUR_HIT_DICE = data["CUR_HIT_DICE"]
     CUR_HP = data["CUR_HP"]
     DEATH_SAVE_SUCCESS = data["DEATH_SAVE_SUCCESS"]
     DEATH_SAVE_FAILURE = data["DEATH_SAVE_FAILURE"]
+    # BONUSES = data["BONUSES"]
     MONEY = data["MONEY"]
     CHANNEL_DIVINITIES = data["CHANNEL_DIVINITIES"]
     LONG_REST_SPELLS = data["LONG_REST_SPELLS"]

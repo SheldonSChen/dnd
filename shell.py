@@ -69,6 +69,29 @@ class DndShell(cmd.Cmd):
         else:
             cast(arg)
     
+    def do_bonus(self, arg):
+        '''Adds a bonus to either attack or damage for a number of actions.
+            (dnd) bonus <bonus die> <"attack" or "damage"> <number of turns>
+        '''
+        if len(arg) == 0:
+            print("ERROR: Missing arguments.")
+            return
+        args = arg.split()
+        if len(args) != 3:
+            print("ERROR: Invalid arg length: {}".format(args))
+            return
+        if not num_in_col(args[0]):
+            print("ERROR: Invalid die: {}".format(args[0]))
+            return
+        if args[1] != "attack" or args[1] != "damage" or args[1] != "save":
+            print("ERROR: Invalid bonus type: {}".format(args[1]))
+            return
+        if not num_in_col(args[2]):
+            print("ERROR: Invalid number of actions: {}".format(args[2]))
+            return
+        
+        bonus(int(args[0]), args[1], int(args[2]))
+
     def do_get_slots(self, arg):
         '''Gets the currently available spell slots.
             (dnd) get_slots <level (optional)>
