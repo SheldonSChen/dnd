@@ -278,6 +278,7 @@ def long_rest():
         print("Long rest cannot restore. 0 HP")
         return
     reset_hp()
+    reset_slots()
     reset_spell_uses(CHANNEL_DIVINITIES, "Channel Divinity")
     reset_spell_uses(LONG_REST_SPELLS, "Long rest")
     
@@ -413,7 +414,7 @@ def load_char_data():
     CUR_HP = data["CUR_HP"]
     DEATH_SAVE_SUCCESS = data["DEATH_SAVE_SUCCESS"]
     DEATH_SAVE_FAILURE = data["DEATH_SAVE_FAILURE"]
-    # BONUSES = data["BONUSES"]
+    BONUSES = data["BONUSES"]
     MONEY = data["MONEY"]
     CHANNEL_DIVINITIES = data["CHANNEL_DIVINITIES"]
     LONG_REST_SPELLS = data["LONG_REST_SPELLS"]
