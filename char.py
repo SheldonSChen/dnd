@@ -2,18 +2,20 @@ from __future__ import print_function
 from sharedHelpers import *
 
 ############### Char Stats ##############
-LEVEL = 3
+LEVEL = 6
+#remember cantrips change next at lvl 11
+#TODO: natural 20 rolls
 
 CHAR_MODS = {
     "str": 0,
     "dex": 0,
     "con": 1,
     "int": 1,
-    "wis": 2,
+    "wis": 3,
     "cha": 3,
 }
 
-PROF = 2
+PROF = 3
 
 CHAR_STATS = {
     # STRENGTH
@@ -68,10 +70,10 @@ CHAR_STATS = {
 
 MAX_HIT_DICE = LEVEL
 # Saved in external file
-# CUR_HIT_DICE = 2
+# CUR_HIT_DICE = 5
 HIT_DICE_TYPE = 8
 
-MAX_HP = 18
+MAX_HP = 41
 # Saved in external file
 # CUR_HP = 13
 
@@ -122,11 +124,11 @@ SPELLS = {
         },
     "toll the dead": {
         # 60ft
-        # WIS save or 1d8 necrotic damage
-        # 1d12 if target is missing any HP 
+        # WIS save or 2d8 necrotic damage
+        # 2d12 if target is missing any HP 
         "level": 0,
         "damage":
-            lambda _: [roll_d(8), roll_d(12)]
+            lambda _: [roll_d(8, 2), roll_d(12, 2)]
         },
     "resistance": {
         # touch
@@ -135,10 +137,10 @@ SPELLS = {
         },
     "word of radiance": {
         # 5ft, choose target(s)
-        # CON save or 1d6 radiant damage
+        # CON save or 2d6 radiant damage
         "level": 0,
         "damage": 
-            lambda _: [roll_d(6)]
+            lambda _: [roll_d(6, 2)]
         },
     
     # Level 1
@@ -152,7 +154,7 @@ SPELLS = {
         # self
         # I gain 1d4 + 5(cast level) - 1 temp HP
         "level": 1,
-        "prepared": True,
+        "prepared": False,
         "self heal":
             lambda cast_level: roll_d(4) + 5 * cast_level -1
         },
@@ -195,7 +197,7 @@ SPELLS = {
         # can't be charmed, frightened, or possessed
         # or advantange on save throw to rid above
         "level": 1,
-        "prepared": False,
+        "prepared": True,
         },
     
     # Level 2
@@ -213,14 +215,47 @@ SPELLS = {
         "level": 2,
         "prepared": True,
         },
+    "spiritual weapon": {
+        "level": 2,
+        "prepared": False,
+        "attack roll": True,
+        "damage":
+            lambda cast_level: [roll_d(8, 3 * cast_level / 2 - 2) + CHAR_STATS["wis"]]
+        },
+    "lesser restoration": {
+        # touch
+        # End disease or afflicted condition.
+        "level": 2,
+        "prepared": True,
+    },
+
+    # Level 3
+    "beacon of hope": {
+        # 30ft, any number of creatures
+        # 1 minute
+        # Adv on wis saves and death saves, and regains max from healing.
+        "level": 3,
+        "prepared": True,
+        },
+    "revivify": {
+        # touch
+        # Creature that has died within the last minute returns to life with 1 HP. 
+        # Can't for died of old age, can't restore missing body parts.
+        # Costs diamonds worth 300 gp.
+        "level": 3,
+        "prepared": True,
+
+    }
 }
 
-CHANNEL_DIVINITY_USES = 1
+CHANNEL_DIVINITY_USES = 2
 # Saved in external file
 # CHANNEL_DIVINITIES = {
 #     "turn undead": {
 #         # 30ft
 #         # WIS save or undead turned
+#         # If an undead fails its saving throw against your Turn Undead feature, 
+#         # the creature is instantly destroyed if its challenge rating is at or below 1/2.
 #         "uses": CHANNEL_DIVINITY_USES,
 #         "max uses": CHANNEL_DIVINITY_USES,
 #         },
@@ -233,8 +268,7 @@ CHANNEL_DIVINITY_USES = 1
 #     "circle of mortality": {
 #         # When healing 0 HP creature, 
 #         # use max of each dice instead.
-#         "uses": CHANNEL_DIVINITY_USES,
-#         "max uses": CHANNEL_DIVINITY_USES,
+#         # ALWAYS APPLIES
 #         },
 # }
 
@@ -263,11 +297,20 @@ CHANNEL_DIVINITY_USES = 1
 #         "uses": CHAR_STATS["wis"],
 #         "max uses": CHAR_STATS["wis"],
 #         },
+#     "sentinel at death's door": {
+#         # 30ft
+#         # Reaction, myself or ally
+#         # change critical hit to 
+#         # normal hit, effects cancelled.
+#         "uses": CHAR_STATS["wis"],
+#         "max uses": CHAR_STATS["wis"],
+#         },
 # }
 
 SPELL_SLOTS_MAX = {
     1: 4,
     2: 2,
+    3: 3,
 }
 
 # Saved in external file

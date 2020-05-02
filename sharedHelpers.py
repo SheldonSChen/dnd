@@ -16,6 +16,8 @@ def roll_d(dice, rolls=1):
     total = 0
     for i in range(rolls):
         total += random.randint(1,dice)
+    if rolls == 1 and total == dice:
+        print("You rolled a natural {}!".format(total))
     return total
 
 def convert_str_to_pairs(flat_list, key_map_fn, val_map_fn, key_check=None, val_check=None):
