@@ -4,7 +4,8 @@ from sharedHelpers import *
 ############### Char Stats ##############
 LEVEL = 6
 #remember cantrips change next at lvl 11
-#TODO: natural 20 rolls
+#TODO: disadv stealth
+# once per long rest, mirror coat
 
 CHAR_MODS = {
     "str": 0,
@@ -63,7 +64,7 @@ CHAR_STATS = {
     "performance":  CHAR_MODS["cha"],
     "persuasion":   CHAR_MODS["cha"] + PROF,
 
-    # SPELL
+    # SPELL (GET)
     "spell attack": CHAR_MODS["wis"] + PROF,
     "spell save dc": 8 + CHAR_MODS["wis"] + PROF,
 }
@@ -144,21 +145,22 @@ SPELLS = {
         },
     
     # Level 1
-    "bane": {
-        # 30ft, up to (2 + cast level) targets
-        # CHA save or 1d4 penalty to attacks/saves
-        "level": 1,
-        "prepared": False,
-        },
-    "false life": {
-        # self
-        # I gain 1d4 + 5(cast level) - 1 temp HP
-        "level": 1,
-        "prepared": False,
-        "self heal":
-            lambda cast_level: roll_d(4) + 5 * cast_level -1
-        },
+    # "bane": {
+    #     # 30ft, up to (2 + cast level) targets
+    #     # CHA save or 1d4 penalty to attacks/saves
+    #     "level": 1,
+    #     "prepared": False,
+    #     },
+    # "false life": {
+    #     # self
+    #     # I gain 1d4 + 5(cast level) - 1 temp HP
+    #     "level": 1,
+    #     "prepared": False,
+    #     "self heal":
+    #         lambda cast_level: roll_d(4) + 5 * cast_level -1
+    #     },
     "command": {
+        # 6 secs
         # 60ft, (cast level) targets
         # WIS save or follow command, no self harm
         "level": 1,
@@ -178,11 +180,11 @@ SPELLS = {
         # 30ft, up to (2 + cast level) targets
         # 1d4 boost to attacks/saves
         "level": 1,
-        "prepared": False,
+        "prepared": True,
         },
     "healing word": {
         # 60ft
-        # bonus action
+        # bonus action only for cantrips
         # Regain (cast level)d4 + CHAR_STATS["wis"] HP
         "level": 1,
         "prepared": True,
@@ -203,21 +205,22 @@ SPELLS = {
     # Level 2
     "prayer of healing": {
         # 30ft, choose up to 6 targets
+        # 10 min
         # Each regain (cast level)d8 + CHAR_STATS["wis"] HP
         "level": 2,
         "prepared": True,
         "heal":
             lambda cast_level: roll_d(8, cast_level) + CHAR_STATS["wis"]
         },
-    "aid": {
-        # 30ft, choose up to 3 allies
-        # Each gain 5 HP and 5 max HP
-        "level": 2,
-        "prepared": True,
-        },
+    # "aid": {
+    #     # 30ft, choose up to 3 allies
+    #     # Each gain 5 HP and 5 max HP
+    #     "level": 2,
+    #     "prepared": False,
+    #     },
     "spiritual weapon": {
         "level": 2,
-        "prepared": False,
+        "prepared": True,
         "attack roll": True,
         "damage":
             lambda cast_level: [roll_d(8, 3 * cast_level / 2 - 2) + CHAR_STATS["wis"]]
