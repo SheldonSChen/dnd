@@ -38,6 +38,12 @@ class DndShell(cmd.Cmd):
             return
         check(arg)
 
+    def do_percent(self, arg):
+        '''Rolls percent die.
+            (dnd) percent
+        '''
+        percent()
+
     def do_attack(self, arg):
         '''Rolls for an attack to hit.
             (dnd) attack <weapon>

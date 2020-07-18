@@ -17,6 +17,9 @@ def check(stat):
     else:
         action(stat, CHAR_STATS, 20, [])
 
+def percent():
+    print("{}%".format(roll_d(100)))
+
 def attack(weapon):
     action(weapon, WEAPONS, 20, ["mod", "prof"], "attack")
 

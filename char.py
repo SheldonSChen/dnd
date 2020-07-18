@@ -4,8 +4,7 @@ from sharedHelpers import *
 ############### Char Stats ##############
 LEVEL = 6
 #remember cantrips change next at lvl 11
-#TODO: disadv stealth
-# once per long rest, mirror coat
+#disadv check
 
 CHAR_MODS = {
     "str": 0,
@@ -303,8 +302,8 @@ CHANNEL_DIVINITY_USES = 2
 #     "sentinel at death's door": {
 #         # 30ft
 #         # Reaction, myself or ally
-#         # change critical hit to 
-#         # normal hit, effects cancelled.
+#         # change critical hit to normal hit, 
+#         # effects triggered by crit hit are cancelled.
 #         "uses": CHAR_STATS["wis"],
 #         "max uses": CHAR_STATS["wis"],
 #         },
