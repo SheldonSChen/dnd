@@ -2,7 +2,7 @@ from __future__ import print_function
 from sharedHelpers import *
 
 ############### Char Stats ##############
-LEVEL = 6
+LEVEL = 7
 #remember cantrips change next at lvl 11
 #disadv check
 
@@ -73,7 +73,7 @@ MAX_HIT_DICE = LEVEL
 # CUR_HIT_DICE = 5
 HIT_DICE_TYPE = 8
 
-MAX_HP = 41
+MAX_HP = 48
 # Saved in external file
 # CUR_HP = 13
 
@@ -247,6 +247,19 @@ SPELLS = {
         "level": 3,
         "prepared": True,
 
+    },
+
+    #Level 4
+    "blight": {
+        # 30 ft
+        # CON save, half damage is success
+        # creature/magic plant: disadv, max damage
+        # plant: withers and dies auto
+        "level": 4,
+        "prepared": True,
+        "damage":
+            lambda cast_level: [roll_d(8, cast_level+4)]
+        },
     }
 }
 
