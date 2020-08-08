@@ -223,7 +223,7 @@ SPELLS = {
         "attack roll": True,
         "damage":
             lambda cast_level: [roll_d(8, 3 * cast_level / 2 - 2) + CHAR_STATS["wis"]]
-        },
+    },
     "lesser restoration": {
         # touch
         # End disease or afflicted condition.
@@ -259,8 +259,7 @@ SPELLS = {
         "prepared": True,
         "damage":
             lambda cast_level: [roll_d(8, cast_level+4)]
-        },
-    }
+    },
 }
 
 CHANNEL_DIVINITY_USES = 2
